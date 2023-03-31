@@ -1,0 +1,21 @@
+doctype html
+html(lang="fr")
+  head
+    title Message de salutation
+  body
+    h1 Bonjour #{nom} #{prenom} !
+    a(href="/base") Aller à la page base
+    table
+      thead
+        tr
+          th Nom
+          th Prénom
+      tbody
+        if typeof documents !== 'undefined'
+          each document in documents
+            tr
+              td= document.nom
+              td= document.prenom
+        else
+          tr
+            td(colspan="2") Aucun document trouvé

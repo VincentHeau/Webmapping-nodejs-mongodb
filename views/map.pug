@@ -1,0 +1,101 @@
+doctype html
+html
+  head
+    title Map
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.css')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.js')
+  body
+    div(id='map', style='height: 400px;')
+    div
+      input(id='filterInput', type='text', placeholder='Filter by name')
+      button(id='filterButton', type='button') Filter
+    script.
+      const map = new ol.Map({
+        target: 'map',
+        layers: [
+          new ol.layer.Tile({
+            source: new ol.source.OSM()
+          }),
+          new ol.layer.Vector({
+            source: new ol.source.Vector({
+              url: '/data',
+              format: new ol.format.GeoJSON()
+            }),
+            style: new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: 4,
+                fill: new ol.style.Fill({
+                  color: 'blue'
+                })
+              })
+            })
+          })
+        ],
+        view: new ol.View({
+          center: ol.proj.fromLonLat([2.3488, 48.8534]),
+          zoom: 12
+        })
+      });
+
+      const filterInput = document.querySelector('#filterInput');
+      const filterButton = document.querySelector('#filterButton');
+
+      filterInput.addEventListener('input', () => {
+        const filterValue = filterInput.value.toLowerCase();
+        const source = map.getLayers().item(1).getSource();
+        source.getFeatures().forEach(feature => {
+          const featureName = feature.get('ins_nom').toLowerCase();
+          if (featureName.startsWith(filterValue)) {
+            feature.setStyle(new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: 5,
+                fill: new ol.style.Fill({
+                  color: 'green'
+                })
+              })
+            }));
+          } else {
+            
+            feature.setStyle(new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: 5,
+                fill: new ol.style.Fill({
+                  color: 'red'
+                })
+              })
+            }));
+          }
+        });
+      });
+      
+      filterButton.addEventListener('click', () => {
+        filterInput.value = '';
+        filterInput.dispatchEvent(new Event('input'));
+      });
+
+
+      // Récupération de la source de données
+      console.log(map.getLayers().getArray()[1])
+      const source = map.getLayers().getArray()[1].getSource();
+
+      // Écoute de l'événement moveend de la carte
+      map.on('moveend', () => {
+      // Récupération de la bounding box de la carte
+      const extent = map.getView().calculateExtent(map.getSize());
+    
+      // Conversion de la bounding box en coordonnées géographiques
+      const bottomLeft = ol.proj.toLonLat(ol.extent.getBottomLeft(extent));
+      const topRight = ol.proj.toLonLat(ol.extent.getTopRight(extent));
+    
+      // Mise à jour de la source de données avec la nouvelle bounding box
+        const filter = [
+            '&&',
+            ['>=', 'ins_x', bottomLeft[0]],
+            ['<=', 'ins_x', topRight[0]],
+            ['>=', 'ins_y', bottomLeft[1]],
+            ['<=', 'ins_y', topRight[1]],
+        ];
+        source.set('filter', filter);
+        });

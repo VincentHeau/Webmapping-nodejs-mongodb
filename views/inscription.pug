@@ -1,0 +1,16 @@
+html
+  head
+    title Formulaire
+    link(rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css")
+    link(rel='stylesheet', type='text/css', href='style.css')
+  body
+    .container
+      h1.text-center Formulaire
+      form(action="/" method="post")
+        .form-group
+          label(for="firstName") Nom :
+          input#nom.form-control(type="text" name="nom" required)
+        .form-group
+          label(for="lastName") Prénom :
+          input#prenom.form-control(type="text" name="prenom" required)
+        button.btn.btn-primary(type="submit") Envoyer
